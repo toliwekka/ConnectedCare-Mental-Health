@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+  <title>TMR International | T-Check Portal Report</title>
+  <link rel="icon" type="image/png" href="logo.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+        <link rel="stylesheet" href="themes.css" />
+        <style>
+
+body {
+    margin: 0;
+    font-family: "Poppins", sans-serif;
+    background-color: var(--primary-dark); /* Deep navy background */
+    color: var(--text-color-dark);
+    padding: 40px 0;
+}
+
+.theme-switcher {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+}
+
+.theme-switcher select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    background-color: var(--card-bg-dark);
+    color: var(--text-color-dark);
+    border: 1px solid var(--secondary-dark);
+}
+
+.hero-section {
+    text-align: center;
+    padding: 2rem 1rem;
+    background: var(--card-bg-dark);
+    backdrop-filter: blur(10px);
+    margin-bottom: 20px;
+    border-radius: 20px;
+    color: var(--text-color-dark);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+    background-image: linear-gradient(145deg, rgba(0, 31, 77, 0.9), rgba(0, 119, 182, 0.3));
+}
+
+.hero-text {
+    font-size: 1.5rem;
+    font-weight: 600;
+    max-width: 900px;
+    margin: 0 auto;
+    color: var(--text-color-dark);
+}
+
+.masonry-layout {
+    column-count: 2;
+    column-gap: 2rem;
+    padding: 2rem;
+}
+
+@media (max-width: 900px) {
+    .masonry-layout {
+        column-count: 1;
+    }
+}
+
+.masonry-item {
+    break-inside: avoid;
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.masonry-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(90, 200, 250, 0.2);
+}
+
+.card,
+.score-card {
+    background: var(--card-bg-dark);
+    border-radius: 16px;
+    padding: 1.5rem;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    color: var(--text-color-dark);
+}
+
+.chart-title {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    font-weight: bold;
+    color: var(--accent-2);
+}
+
+.score-card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.icon-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--secondary);
+}
+
+.score-card-body {
+    padding-top: 10px;
+}
+
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hero-sectionII {
+    background-color: var(--secondary-dark);
+    color: var(--text-color-dark);
+    padding: 40px 20px;
+    border-radius: 16px;
+    margin-bottom: 40px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-description-dynamic {
+    font-size: 1.5rem;
+    font-weight: 500;
+    transition: opacity 0.5s ease-in-out;
+    min-height: 60px;
+    color: var(--accent-2);
+}
+
+.hero-description {
+    font-size: 1.5rem;
+    font-weight: 700;
+    background-color: var(--highlight-bg);
+    padding: 1.2rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+    max-width: 100vw;
+    margin: 2rem auto;
+    text-align: center;
+    line-height: 1.6;
+    letter-spacing: 0.4px;
+    color: var(--highlight-text-color);
+}
+
+.fullscreen-iframe {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    background: var(--primary-dark);
+    z-index: 9999;
+}
+
+.fullscreen-iframe iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.close-btn {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background: var(--highlight-bg);
+    color: #fff;
+    border: none;
+    padding: 10px 18px;
+    font-size: 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    z-index: 10000;
+}
+
+        </style>
+    </head>
+    <body>
+            <div class="theme-switcher">
+                <select id="themeSelect" class="form-select">
+                    <option value="default" selected> <img src="ogo.png" alt="TMR Fresh Logo" style="width: 20px; vertical-align: middle; margin-right: 8px; display: inline-block;" /> TMR </option>
+                    <option value="fieryRed">🔥 Fiery Red</option>
+                    <option value="blushRose">🌸 Blush Rose</option>
+                    <option value="midnightDark">🌚 Midnight Dark</option>
+                    <option value="sereneLavender">💜 Serene Lavender</option>
+                    <option value="oceanBreeze">🌊 Ocean Breeze</option>
+                    <option value="goldenSunset">🌅 Golden Sunset</option>
+                    <option value="softStone">🪶 Soft Stone</option>
+                    <option value="softBlush">💖 Soft Blush</option>
+                </select>
+            </div>
+       
+
+        <div id="introPage" class="container">
+            <div class="hero-section">
+                <h1 id="resultsTitle" class="text-center mb-4" style="color: var(--primary); font-weight: 700;">
+                    <span id="userName">Your</span> your T|Check report offers a clear and thoughtful perspective on your present mental well-being.
+                </h1>
+            </div>
+        </div>
+        <div class="hero-sectionII">
+            <div id="heroText" class="hero-text">
+                Welcome to your T|Check report. Each chart explains your unique well-being snapshot.
+            </div>
+        </div>
+
+        <div class="masonry-layout">
+            <div class="score-card masonry-item">
+                <div class="score-summary" id="partA-summary">
+                    <h2>Part A: 14-Item Emotional and Psychological State Snapshot</h2>
+                    <p><strong>Raw Score:</strong> <span id="partA-raw"></span> / 70</p>
+                    <p><strong>Percentage:</strong> <span id="partA-percent"></span></p>
+                    <p><strong>Status:</strong> <span id="partA-status"></span></p>
+                    <p><em id="partA-comment"></em></p>
+                </div>
+            </div>
+
+            <div class="score-card masonry-item">
+                <div class="score-summary" id="partB-summary">
+                    <h2>Part B: 24-Prompt Behavioral and Functional State Evaluation</h2>
+                    <p><strong>Raw Score:</strong> <span id="partB-raw"></span> / 240</p>
+                    <p><strong>Percentage:</strong> <span id="partB-percent"></span></p>
+                    <p><strong>Status:</strong> <span id="partB-status"></span></p>
+                    <p><em id="partB-comment"></em></p>
+                </div>
+            </div>
+
+            <div class="score-card masonry-item">
+                <div class="score-card-header">
+                    <div class="icon-title">🧠 Part A – Emotional and Psychological State - Score Gauge:</div>
+                </div>
+                <div class="score-card-body"><div id="gaugeA"></div></div>
+            </div>
+
+            <div class="score-card masonry-item">
+                <div class="score-card-header">
+                    <div class="icon-title">🎯 Part B – Behavioral and Functional State - Percentage Score:</div>
+                </div>
+                <div class="score-card-body"><div id="gaugeB"></div></div>
+            </div>
+
+            <div class="card masonry-item">
+                <div class="chart-title">Behavioral Trends Overview</div>
+                <div id="barChartApex"></div>
+            </div>
+
+            <div disabled class="card masonry-item">
+                <div class="chart-title">🧠📊 Your Emotional & Functional Balance</div>
+                <canvas id="donutChart"></canvas>
+            </div>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const name = localStorage.getItem("firstNames") || "Your";
+                const capitalized = name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+                document.getElementById("userName").textContent = `${capitalized},`;
+            });
+
+            // Global variables
+            let AScore = 0;
+            let BScore = 0;
+            let percA = 0;
+            let percB = 0;
+
+            const maxA = 70;
+            const maxB = 240;
+
+const heroMessages = [
+    "🧠 Your emotional gauge reveals a deeper understanding of how you've been feeling—emotionally, socially, and cognitively. It paints a picture of your current state and guides your journey toward better mental wellness.",
+    "💡 A higher score in Part A often indicates greater inner resilience, calm, and mental clarity. It shows your ability to navigate life's challenges with strength and a sense of peace.",
+    "🎯 Your functional score reflects how well you're managing daily life, routines, responsibilities, and support systems. It’s a snapshot of your ability to thrive in your everyday environment, from work to relationships.",
+    "⚖️ Balance across emotional and functional areas is the key to overall well-being. When both aspects are in harmony, you’re more likely to feel grounded, resilient, and capable of handling life’s ups and downs.",
+    "📈 Bar charts offer a clear visual comparison of your emotional and functional states—side by side. This allows you to easily see areas where you're excelling and others that may need more attention.",
+    "🍩 Donut visuals provide a quick and intuitive glance at where you stand emotionally and functionally. This visual representation highlights areas of strength and opportunity for growth.",
+    "📊 Each chart is a mirror of your current state. It not only shows your scores but also reflects the trends and patterns in your emotional and functional life, helping you identify what’s working and what needs adjustment.",
+    "🧭 Think of these results as a compass, not a final destination. They’re here to guide your growth journey, helping you make informed decisions rather than defining who you are.",
+    "🌱 Scores shift as life changes. These insights capture a moment in time and offer a snapshot of where you currently are, helping you realign your path as you evolve.",
+    "🛠️ Use the feedback to build better habits, forge deeper connections, and create healthier boundaries. This is not just about numbers; it's about action that supports your mental well-being.",
+    "📌 Remember: no score can capture your full complexity. The numbers are simply a tool to open the door to deeper reflection and greater self-awareness, offering insight into areas where you can grow.",
+    "🫂 You are not your scores. Your journey is unfolding in real-time, and this is just one chapter. Your mental health story is dynamic and always evolving.",
+    "🌈 Wellness is a spectrum. Wherever you fall on that spectrum today, know that there’s always room for growth. Every score is an opportunity for improvement and a deeper connection with yourself.",
+    "🔥 High scores show you're thriving in certain areas. Lower scores highlight where you may need additional support or a shift in your approach. Both are equally important in the journey toward mental well-being.",
+    "💬 Each insight you receive is an invitation to pause and reflect on your thoughts, emotions, and environment. It’s an opportunity to check in with yourself, adjust as needed, and keep moving forward."
+];
+
+            // Rotate messages
+            let heroIndex = 0;
+            setInterval(() => {
+                const heroEl = document.getElementById("heroText");
+                if (heroEl) {
+                    heroIndex = (heroIndex + 1) % heroMessages.length;
+                    heroEl.textContent = heroMessages[heroIndex];
+                }
+            }, 5000);
+
+            // On page load
+
+            window.onload = function () {
+                getStoredData(); // Call the function to fetch the data
+            };
+
+            window.addEventListener("DOMContentLoaded", () => {
+                // Initial fetch of the scores from localStorage
+                AScore = parseInt(localStorage.getItem("AScore")) || 0;
+                BScore = parseInt(localStorage.getItem("BScore")) || 0;
+
+                // If the values are already set, proceed with the calculations
+                if (AScore !== 0 && BScore !== 0) {
+                    percA = parseFloat(((AScore / maxA) * 100).toFixed(2));
+                    percB = parseFloat(((BScore / maxB) * 100).toFixed(2));
+
+                    updateScores(AScore, BScore);
+                    updateTextContent(AScore, BScore, percA, percB);
+                    plotGauges(percA, percB);
+                    renderAllCharts(percA, percB);
+                } else {
+                    getStoredData(); // If the values aren't set, fetch again
+                }
+            });
+
+            // Function to fetch data from localStorage and retry if it's not yet available
+            function getStoredData() {
+                const tempAScore = localStorage.getItem("AScore");
+                const tempBScore = localStorage.getItem("BScore");
+
+                // If the scores are not yet available, retry after 100ms
+                if (tempAScore === null || tempBScore === null) {
+                    setTimeout(getStoredData, 400); // Retry every 100ms until values are found
+                } else {
+                    // Once the data is available, update the scores
+                    AScore = parseInt(tempAScore);
+                    BScore = parseInt(tempBScore);
+
+                    // Recalculate percentages after data is available
+                    percA = parseFloat(((AScore / maxA) * 100).toFixed(2));
+                    percB = parseFloat(((BScore / maxB) * 100).toFixed(2));
+
+                    updateScores(AScore, BScore);
+                    updateTextContent(AScore, BScore, percA, percB);
+                    plotGauges(percA, percB);
+                    renderAllCharts(percA, percB);
+                }
+            }
+
+            function updateScores(AScore, BScore) {
+                const scoreAElement = document.getElementById("scoreA");
+                const scoreBElement = document.getElementById("scoreB");
+                const totalScoreElement = document.getElementById("totalScore");
+
+                if (scoreAElement) scoreAElement.textContent = `AScore: ${AScore}`;
+                if (scoreBElement) scoreBElement.textContent = `BScore: ${BScore}`;
+                if (totalScoreElement) totalScoreElement.textContent = `Total Score: ${AScore + BScore}`;
+            }
+
+            function updateTextContent(rawA, rawB, percA, percB) {
+                document.getElementById("partA-raw").textContent = rawA;
+                document.getElementById("partA-percent").textContent = `${percA}%`;
+                document.getElementById("partA-status").textContent = getPartAStatus(percA);
+                document.getElementById("partA-comment").textContent = getPartAComment(percA);
+
+                document.getElementById("partB-raw").textContent = rawB;
+                document.getElementById("partB-percent").textContent = `${percB}%`;
+                document.getElementById("partB-status").textContent = getPartBStatus(percB);
+                document.getElementById("partB-comment").textContent = getPartBComment(percB);
+            }
+
+            function getPartAStatus(score) {
+                if (score < 57) return "Below Optimal (Severe concern)";
+                if (score < 63) return "Watchful (Borderline)";
+                if (score < 86) return "Generally Stable (Mild issues)";
+                return "Thriving (Excellent)";
+            }
+
+            function getPartAComment(percentage) {
+                const messages = [
+                    {
+                        range: [0, 57],
+                        list: [
+                            "It looks like you’ve had a tough time recently. You’re not alone — let's take the first step toward getting the support you deserve.",
+                            "Your emotional well-being matters. Let’s explore ways to strengthen your resilience and find moments of peace.",
+                            "This score suggests a heavy emotional load. It’s okay to seek help, and small steps can lead to powerful healing.",
+                            "You’re doing the best you can, and that’s enough for now. Let's work together to lighten your emotional burden.",
+                            "There’s strength in acknowledging when things feel overwhelming. You're not alone in this journey.",
+                            "Let’s pause and breathe. The storm may be strong, but so is your potential to rise above it.",
+                        ],
+                    },
+                    {
+                        range: [57.01, 63],
+                        list: [
+                            "You’re at a delicate balance — not too low, but not quite where you might want to be. A small shift could make a big difference.",
+                            "You’re doing okay, but there’s room for upliftment. Let’s focus on building daily emotional wins.",
+                            "Your emotional state shows resilience with some signs of weariness. You’ve got what it takes to bounce back.",
+                            "You’ve come this far — now let’s strengthen your momentum toward well-being.",
+                            "You're at a pivot point — with some intentional care, things can start looking up.",
+                            "This is a reminder that even moderate progress is still progress. Let’s add a little spark to your emotional wellness.",
+                        ],
+                    },
+                    {
+                        range: [63.01, 86],
+                        list: [
+                            "You’re managing well emotionally — great job. Let’s keep nurturing what’s working and gently improve what isn’t.",
+                            "There’s evidence of solid emotional grounding here. Keep building on those positive foundations.",
+                            "You’re in a stable space emotionally. That’s something to celebrate!",
+                            "Your emotional awareness is evident — you’re doing the inner work, and it shows.",
+                            "This is a good emotional health zone. Let’s keep reinforcing these habits and insights.",
+                            "You're showing strength and balance. A few intentional actions could elevate you even further.",
+                        ],
+                    },
+                    {
+                        range: [86.01, 100],
+                        list: [
+                            "Outstanding emotional strength! You’re radiating resilience and inner peace.",
+                            "This score reflects a high level of emotional clarity and wellness. Keep shining.",
+                            "You’re in a powerful emotional space. Let’s harness that to uplift others too.",
+                            "Your emotional well-being is exceptional. Keep nurturing what helps you thrive.",
+                            "You’ve cultivated an inner calm that’s both rare and inspiring.",
+                            "Your emotional energy is vibrant and centered — a beautiful state to be in.",
+                        ],
+                    },
+                ];
+
+                return pickAComment(percentage, messages);
+            }
+
+            function pickAComment(percentage, messages) {
+                const messageGroup = messages.find(({ range }) => percentage >= range[0] && percentage <= range[1]);
+
+                if (messageGroup && messageGroup.list.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * messageGroup.list.length);
+                    return messageGroup.list[randomIndex];
+                } else {
+                    return "No comment available for this score.";
+                }
+            }
+
+            function getPartBStatus(score) {
+                if (score < 29) return "Critical (Severe concern)";
+                if (score < 54) return "Needs Attention (Significant concern)";
+                if (score < 79) return "Needs Improvement (Mild concern)";
+                return "Functioning Well (Healthy range)";
+            }
+
+            function getPartBComment(percentage) {
+                const messages = [
+                    {
+                        range: [0, 29],
+                        list: [
+                            "Your support system and sense of belonging may need strengthening. Let's explore ways to help you feel more connected and supported.",
+                            "This score suggests you're experiencing some social or environmental disconnection. You're not alone, and things can improve with the right support.",
+                            "It seems like your current environment might not be meeting your emotional or relational needs. Let’s identify what could make things better.",
+                            "Everyone needs a safe space to thrive — let’s work on building or rebuilding that for you.",
+                            "Support is essential to growth. Let's find the people and places that lift you up.",
+                        ],
+                    },
+                    {
+                        range: [29.01, 54],
+                        list: [
+                            "You're navigating through some ups and downs in your external environment. Let’s strengthen the supportive elements around you.",
+                            "There’s potential for greater connection and comfort in your surroundings. A few key shifts can bring big change.",
+                            "Your environment is somewhat stable, but there's room for improvement. Let’s boost your sense of safety and support.",
+                            "You’re making it work — now let’s make it better. A bit more structure or support could elevate your environment.",
+                            "Progress is showing, but there’s space to create more meaningful support systems. You're on the right path.",
+                        ],
+                    },
+                    {
+                        range: [54.01, 79],
+                        list: [
+                            "You’ve built a relatively supportive environment — great work. Let’s keep improving what’s already working.",
+                            "This score shows you're surrounded by helpful elements, with just a few gaps to close. You're almost there!",
+                            "You’re in a pretty solid space. A little more refinement and connection could take things to the next level.",
+                            "You’ve created a foundation of support and safety. Keep reinforcing those positive spaces and relationships.",
+                            "Nice progress! Your surroundings and support systems are showing up for you in meaningful ways.",
+                        ],
+                    },
+                    {
+                        range: [79.01, 100],
+                        list: [
+                            "You’re thriving in a nurturing environment — well done! Let’s celebrate what’s working and keep it going.",
+                            "This score reflects a high level of environmental and relational wellness. Keep surrounding yourself with what uplifts you.",
+                            "You’re in a great place socially and environmentally. Let’s keep fueling that positive momentum.",
+                            "You’ve cultivated meaningful support and a sense of belonging — that’s powerful.",
+                            "Strong connections and a safe environment are shining through here. You’re doing an amazing job.",
+                        ],
+                    },
+                ];
+
+                return pickComment(percentage, messages);
+            }
+
+            function pickComment(percentage, messages) {
+                const messageGroup = messages.find(({ range }) => percentage >= range[0] && percentage <= range[1]);
+
+                if (messageGroup && messageGroup.list.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * messageGroup.list.length);
+                    return messageGroup.list[randomIndex];
+                } else {
+                    return "No comment available for this score.";
+                }
+            }
+
+            function plotGauges(percA, percB) {
+                Plotly.newPlot("gaugeA", [
+                    {
+                        type: "indicator",
+                        mode: "gauge+number",
+                        value: percA,
+                        title: { text: "Part A Gauge" },
+                        gauge: {
+                            axis: { range: [0, 100] },
+                            bar: { color: "#a4b0b1" },
+                            steps: [
+                                { range: [0, 57], color: "#FF0000" },
+                                { range: [57, 63], color: "#FF8C00" },
+                                { range: [63, 86], color: "#FFFC00" },
+                                { range: [86, 100], color: "#00FF00" },
+                            ],
+                        },
+                    },
+                ]);
+
+                Plotly.newPlot("gaugeB", [
+                    {
+                        type: "indicator",
+                        mode: "gauge+number",
+                        value: percB,
+                        title: { text: "Part B Gauge" },
+                        gauge: {
+                            axis: { range: [0, 100] },
+                            bar: { color: "#a4b0b1" },
+                            steps: [
+                                { range: [0, 29], color: "#FF0000" },
+                                { range: [29, 54], color: "#FF8C00" },
+                                { range: [54, 79], color: "#FFFC00" },
+                                { range: [79, 100], color: "#00FF00" },
+                            ],
+                        },
+                    },
+                ]);
+            }
+
+            // Function to determine the background color based on Part A score
+            function getColorForPartA(percA) {
+                if (percA >= 0 && percA <= 57) return "#FF0000"; // Red
+                if (percA > 57 && percA <= 63) return "#FF8C00"; // Orange
+                if (percA > 63 && percA <= 86) return "#FFFC00"; // Yellow
+                if (percA > 86 && percA <= 100) return "#00FF00"; // Green
+                return "#FFFFFF"; // Default white if out of range
+            }
+
+            // Function to determine the background color based on Part B score
+            function getColorForPartB(percB) {
+                if (percB >= 0 && percB <= 29) return "#FF0000"; // Red
+                if (percB > 29 && percB <= 54) return "#FF8C00"; // Orange
+                if (percB > 54 && percB <= 79) return "#FFFC00"; // Yellow
+                if (percB > 79 && percB <= 100) return "#00FF00"; // Green
+                return "#FFFFFF"; // Default white if out of range
+            }
+
+            let donutChartInstance = null;
+            let barChartInstance = null;
+
+            function renderAllCharts(percA, percB) {
+                const cAScore = Math.round(percA);
+                const cBScore = Math.round(percB);
+
+                const partAColor = getColorForPartA(percA);
+                const partBColor = getColorForPartB(percB);
+
+                // Destroy existing donut chart if it exists
+                if (donutChartInstance) donutChartInstance.destroy();
+
+                // Create new Donut Chart (Chart.js)
+                const donutCtx = document.getElementById("donutChart").getContext("2d");
+                donutChartInstance = new Chart(donutCtx, {
+                    type: "doughnut",
+                    data: {
+                        labels: ["Part A", "Part B"],
+                        datasets: [
+                            {
+                                data: [percA, percB],
+                                backgroundColor: [partAColor, partBColor],
+                            },
+                        ],
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: { color: "#fff" },
+                            },
+                        },
+                    },
+                });
+
+                // Destroy existing Apex bar chart if it exists
+                if (barChartInstance) {
+                    barChartInstance.destroy();
+                    document.querySelector("#barChartApex").innerHTML = ""; // clean DOM
+                }
+
+                // Create Bar Chart (ApexCharts)
+                barChartInstance = new ApexCharts(document.querySelector("#barChartApex"), {
+                    chart: { type: "bar", height: 300 },
+                    series: [
+                        {
+                            name: "Score",
+                            data: [cAScore, cBScore],
+                        },
+                    ],
+                    xaxis: {
+                        categories: ["Part A", "Part B"],
+                    },
+                    colors: ["#1abc9c", "#9b59b6"],
+                });
+                barChartInstance.render();
+
+                // Gauge Charts (Plotly)
+                Plotly.newPlot("gaugeA", [
+                    {
+                        type: "indicator",
+                        mode: "gauge+number",
+                        value: percA,
+                        title: { text: "Part A Gauge" },
+                        gauge: {
+                            axis: { range: [0, 100] },
+                            bar: { color: "#a4b0b1" },
+                            steps: [
+                                { range: [0, 57], color: "#FF0000" },
+                                { range: [57.01, 63], color: "#FF8C00" },
+                                { range: [63.01, 86], color: "#FFFC00" },
+                                { range: [86.01, 100], color: "#00FF00" },
+                            ],
+                        },
+                    },
+                ]);
+
+                Plotly.newPlot("gaugeB", [
+                    {
+                        type: "indicator",
+                        mode: "gauge+number",
+                        value: percB,
+                        title: { text: "Part B Gauge" },
+                        gauge: {
+                            axis: { range: [0, 100] },
+                            bar: { color: "#a4b0b1" },
+                            steps: [
+                                { range: [0, 29], color: "#FF0000" },
+                                { range: [29.01, 54], color: "#FF8C00" },
+                                { range: [54.01, 79], color: "#FFFC00" },
+                                { range: [79.01, 100], color: "#00FF00" },
+                            ],
+                        },
+                    },
+                ]);
+            }
+        </script>
+        
+
+        <script src="themes.js"></script>
+
+        <script>
+
+            // Force default theme to midnightDark on report load
+            localStorage.setItem("theme", "default");
+            let currentTheme = "default";
+            applyTheme(currentTheme);
+
+            const themeSelect = document.getElementById("themeSelect");
+
+            // Theme selection dropdown
+            document.addEventListener("DOMContentLoaded", () => {
+                const themeSelect = document.getElementById("themeSelect");
+                if (themeSelect) {
+                    themeSelect.value = currentTheme;
+                    themeSelect.addEventListener("change", (e) => {
+                        applyTheme(e.target.value);
+                    });
+                }
+
+                // Re-broadcast theme for late-loading iframes
+                setTimeout(() => {
+                    broadcastThemeToIframes(currentTheme);
+                }, 100);
+            });
+
+            // Apply the selected theme
+            function applyTheme(themeName) {
+                const theme = themes[themeName];
+                if (!theme) return;
+
+                // Apply CSS variables
+                Object.entries(theme).forEach(([key, value]) => {
+                    document.documentElement.style.setProperty(key, value);
+                });
+
+                // Adjust text color for readability
+                setHeroDescriptionTextColor();
+
+                // Persist and sync
+                localStorage.setItem("theme", themeName);
+                currentTheme = themeName;
+                broadcastThemeToIframes(themeName);
+            }
+
+            // Send theme to all iframes
+            function broadcastThemeToIframes(themeName) {
+                document.querySelectorAll("iframe").forEach((iframe) => {
+                    iframe.contentWindow?.postMessage({ theme: themeName }, "*");
+                });
+            }
+
+            // Adjust text color based on theme background
+            function setHeroDescriptionTextColor() {
+                const bg = getComputedCSSVar("--primary-dark");
+                if (!bg || !bg.startsWith("#")) return;
+                const luminance = getLuminance(bg);
+                const color = luminance > 0.5 ? "#111" : "#fff";
+                const heroDesc = document.querySelector(".hero-description");
+                if (heroDesc) heroDesc.style.color = color;
+            }
+
+            // Get CSS variable value
+            function getComputedCSSVar(variable) {
+                return getComputedStyle(document.documentElement).getPropertyValue(variable).trim();
+            }
+
+            // Calculate luminance for color contrast
+            function getLuminance(hex) {
+                const rgb = hex
+                    .replace("#", "")
+                    .match(/.{2}/g)
+                    .map((x) => parseInt(x, 16) / 255);
+                const lum = rgb.map((c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)));
+                return 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+            }
+
+            // Listen for theme sync messages
+            window.addEventListener("message", (event) => {
+                if (event.data?.theme && themes[event.data.theme]) {
+                    applyTheme(event.data.theme);
+                    const themeSelect = document.getElementById("themeSelect");
+                    if (themeSelect) themeSelect.value = event.data.theme;
+                }
+            });
+        </script>
+    </body>
+</html>
