@@ -357,8 +357,55 @@ const heroMessages = [
                     updateTextContent(AScore, BScore, percA, percB);
                     plotGauges(percA, percB);
                     renderAllCharts(percA, percB);
+                    sendLocalStorageToSheets();
                 }
             }
+
+
+
+
+function sendLocalStorageToSheets() {
+  const formData = {};
+
+  // Collect localStorage data that starts with 'form_'
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key.startsWith("form_")) {
+      const fieldName = key.replace("form_", "");
+      const value = localStorage.getItem(key);
+      formData[fieldName] = value;
+    }
+  }
+
+  // Optionally include a timestamp
+  formData.timestamp = new Date().toISOString();
+
+  // Send data using no-cors mode (avoids CORS issues with Google Apps Script)
+  fetch("https://script.google.com/macros/s/AKfycbwfTPxrBxp41x8p5klprPyAzP0VfU1iZqy5YJv_4PP0Up_t9sWqJRHMTqyAdm8lHc6s/exec", {
+    method: "POST",
+    mode: "no-cors", // <-- Important to bypass CORS restriction
+    body: JSON.stringify(formData),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(() => {
+    // Since we can't get a response in no-cors mode, assume success
+    alert("✅ Data sent to Google Sheets! Check your sheet to confirm.");
+    // Optionally clear stored data
+    // localStorage.clear();
+  })
+  .catch(error => {
+    console.error("❌ Error sending data:", error);
+    alert("❌ There was a problem sending your data. Please try again.");
+  });
+}
+
+
+
+
+
+
 
             function updateScores(AScore, BScore) {
                 const scoreAElement = document.getElementById("scoreA");
@@ -760,6 +807,9 @@ const heroMessages = [
                     if (themeSelect) themeSelect.value = event.data.theme;
                 }
             });
+
+
+
         </script>
     </body>
 </html>
